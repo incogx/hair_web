@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hair and Scalp Disease Detection Project</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Medical Tech (Blue, Green, Slate Gray) -->
+    <!-- Application Structure Plan: The SPA is designed as a top-down narrative dashboard. It starts with a high-level introduction, moves to the core problem and our proposed solution, then dives into an interactive demonstration of the technology's workflow. The centerpiece is a "Results Dashboard" showcasing the key performance metrics (accuracy, latency) and the crucial explainability feature. This is followed by the project's development journey (milestones) and future vision. This structure was chosen to guide the user from the "why" (problem) to the "how" (workflow) and the "what" (results), making a complex technical project easily digestible and engaging. The non-linear navigation allows users to jump to sections of interest. -->
+    <!-- Visualization & Content Choices: 
+        - Problem/Solution: Report Info -> Challenges in manual diagnosis vs. AI benefits. Goal -> Compare. Viz -> Side-by-side text cards. Interaction -> None. Justification -> Clear, direct comparison of concepts. Library -> HTML/Tailwind.
+        - Workflow: Report Info -> 5-step process from image to result. Goal -> Organize/Change. Viz -> Interactive step-by-step diagram. Interaction -> On-click, details for each step are revealed. Justification -> Turns a static list into an engaging, self-paced exploration of the technical pipeline. Library -> HTML/Tailwind/JS.
+        - Results (Accuracy): Report Info -> 92% model accuracy. Goal -> Inform/Compare. Viz -> Donut Chart. Interaction -> Hover for details. Justification -> A donut chart is a powerful visual for representing a key percentage-based metric, immediately conveying success. Library -> Chart.js.
+        - Results (Latency): Report Info -> 300ms inference time. Goal -> Inform. Viz -> Large metric card. Interaction -> None. Justification -> Highlights a critical performance indicator for mobile usability. Library -> HTML/Tailwind.
+        - Results (Explainability): Report Info -> Grad-CAM visuals. Goal -> Inform/Explain. Viz -> Side-by-side image comparison (mockup). Interaction -> None. Justification -> Directly demonstrates the "explainability" feature, which is a core project objective. Library -> HTML/Tailwind.
+        - Milestones: Report Info -> 4 phases of development. Goal -> Change/Organize. Viz -> Interactive horizontal timeline. Interaction -> On-click, details for each phase are highlighted. Justification -> Provides a clear, visual overview of the project's progression over time. Library -> HTML/Tailwind/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #059669; /* emerald-600 */
+            border-bottom-color: #059669; /* emerald-600 */
+        }
+        .section-title {
+            border-bottom: 3px solid #10b981; /* emerald-500 */
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .step-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .milestone {
+            transition: background-color 0.3s, border-color 0.3s;
+            cursor: pointer;
+        }
+        .milestone.active {
+            background-color: #d1fae5; /* emerald-100 */
+            border-color: #10b981; /* emerald-500 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-600">Scalp AI</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#problem" class="nav-link font-medium">Problem & Solution</a>
+                <a href="#workflow" class="nav-link font-medium">Workflow</a>
+                <a href="#results" class="nav-link font-medium">Results</a>
+                <a href="#journey" class="nav-link font-medium">Journey</a>
+                <a href="#next-steps" class="nav-link font-medium">Next Steps</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5">
+                    <option value="#top">Menu</option>
+                    <option value="#problem">Problem & Solution</option>
+                    <option value="#workflow">Workflow</option>
+                    <option value="#results">Results</option>
+                    <option value="#journey">Journey</option>
+                    <option value="#next-steps">Next Steps</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-16">
+        
+        <section id="top" class="text-center mb-16 md:mb-24">
+            <h2 class="text-3xl md:text-5xl font-bold text-slate-800 mb-4">Hair and Scalp Disease Detection</h2>
+            <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">An interactive exploration of our project: A mobile app with AI-powered explainability and severity scoring.</p>
+        </section>
+
+        <section id="problem" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 section-title">The Challenge & Our AI-Powered Solution</h3>
+                <p class="mt-4 text-slate-600 max-w-2xl mx-auto">This section outlines the real-world problem our project addresses and introduces our mobile application as a transformative solution. We contrast the limitations of traditional diagnosis with the benefits of accessible, AI-driven technology.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="bg-white p-8 rounded-xl shadow-md border border-red-200">
+                    <h4 class="text-2xl font-semibold text-red-600 mb-4">The Problem: Diagnostic Hurdles</h4>
+                    <ul class="space-y-3 list-disc list-inside text-slate-600">
+                        <li><span class="font-semibold">Growing Prevalence:</span> Hair and scalp conditions affect millions globally, creating a significant healthcare burden.</li>
+                        <li><span class="font-semibold">Diagnostic Bottleneck:</span> Manual diagnosis is often slow, subjective, and requires specialized expertise which is not always available.</li>
+                        <li><span class="font-semibold">Limited Access:</span> Many regions lack sufficient dermatologists, leading to delayed diagnosis and treatment.</li>
+                        <li><span class="font-semibold">Need for Accessibility:</span> A critical need exists for a tool that can democratize early detection and empower patients.</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-emerald-300">
+                    <h4 class="text-2xl font-semibold text-emerald-600 mb-4">The Solution: Accessible AI</h4>
+                    <ul class="space-y-3 list-disc list-inside text-slate-600">
+                        <li><span class="font-semibold">AI-Powered Detection:</span> An accurate deep learning model to identify common hair and scalp diseases from a simple photo.</li>
+                        <li><span class="font-semibold">Severity Scoring:</span> A system to quantify the severity of the detected condition, helping to prioritize cases.</li>
+                        <li><span class="font-semibold">Built-in Explainability:</span> Visual heatmaps (Grad-CAM) show *why* the model made a specific prediction, building trust and aiding verification.</li>
+                        <li><span class="font-semibold">Mobile First:</span> A user-friendly mobile app for seamless image capture and instant, on-device diagnosis.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="workflow" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 section-title">The Workflow: From Image to Insight</h3>
+                 <p class="mt-4 text-slate-600 max-w-2xl mx-auto">Explore our end-to-end process interactively. This section details the technological pipeline, from the moment a user provides an image to the final, explainable diagnosis. Click on each step to learn more about the models and methods used.</p>
+            </div>
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
+                <div id="step-1" class="step-card bg-white p-4 rounded-lg shadow-md border w-full md:w-auto text-center">
+                    <div class="text-3xl mb-2">📷</div>
+                    <h5 class="font-semibold">1. Image Input</h5>
+                </div>
+                <div class="text-2xl text-slate-400 hidden md:block">&rarr;</div>
+                <div id="step-2" class="step-card bg-white p-4 rounded-lg shadow-md border w-full md:w-auto text-center">
+                    <div class="text-3xl mb-2">✂️</div>
+                    <h5 class="font-semibold">2. Segmentation</h5>
+                </div>
+                <div class="text-2xl text-slate-400 hidden md:block">&rarr;</div>
+                <div id="step-3" class="step-card bg-white p-4 rounded-lg shadow-md border w-full md:w-auto text-center">
+                    <div class="text-3xl mb-2">🧠</div>
+                    <h5 class="font-semibold">3. Classification</h5>
+                </div>
+                <div class="text-2xl text-slate-400 hidden md:block">&rarr;</div>
+                <div id="step-4" class="step-card bg-white p-4 rounded-lg shadow-md border w-full md:w-auto text-center">
+                    <div class="text-3xl mb-2">💡</div>
+                    <h5 class="font-semibold">4. Explainability</h5>
+                </div>
+                 <div class="text-2xl text-slate-400 hidden md:block">&rarr;</div>
+                <div id="step-5" class="step-card bg-white p-4 rounded-lg shadow-md border w-full md:w-auto text-center">
+                    <div class="text-3xl mb-2">📱</div>
+                    <h5 class="font-semibold">5. Mobile App</h5>
+                </div>
+            </div>
+            <div id="workflow-details" class="bg-emerald-50 p-6 rounded-lg text-center min-h-[100px] flex items-center justify-center">
+                <p class="text-emerald-800 font-medium">Click on a step above to see details here.</p>
+            </div>
+        </section>
+
+        <section id="results" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 section-title">Results Dashboard</h3>
+                <p class="mt-4 text-slate-600 max-w-2xl mx-auto">This dashboard presents the core outcomes of our project. Here you can see our model's performance metrics and view a demonstration of the Grad-CAM explainability feature, which is central to building user trust and clinical utility.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center text-center">
+                    <h4 class="text-xl font-semibold mb-2">Model Accuracy</h4>
+                    <p class="text-slate-500 mb-4">Performance on test dataset.</p>
+                    <div class="chart-container">
+                        <canvas id="accuracyChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center text-center">
+                    <h4 class="text-xl font-semibold mb-2">Inference Latency</h4>
+                    <p class="text-slate-500 mb-4">Speed on a standard mobile device.</p>
+                    <div class="text-6xl font-bold text-emerald-600">300ms</div>
+                    <p class="mt-2 text-slate-600">Enables a smooth, real-time user experience.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg md:col-span-2 lg:col-span-1">
+                    <h4 class="text-xl font-semibold mb-4 text-center">Grad-CAM Explainability</h4>
+                    <p class="text-slate-500 mb-4 text-center">Visualizing the 'Why'</p>
+                    <div class="grid grid-cols-2 gap-4 items-center">
+                        <div class="text-center">
+                            <img src="https://placehold.co/400x400/e2e8f0/475569?text=Scalp+Image" alt="Scalp" class="rounded-lg shadow-md w-full">
+                            <p class="text-sm mt-2 font-medium">Original Input</p>
+                        </div>
+                        <div class="text-center">
+                             <img src="https://placehold.co/400x400/e2e8f0/475569?text=Heatmap" alt="Heatmap" class="rounded-lg shadow-md w-full" style="background-image: linear-gradient(to top, rgba(255,0,0,0.6), rgba(255,255,0,0.3), transparent); background-size: cover;">
+                            <p class="text-sm mt-2 font-medium">AI Focus (Heatmap)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="journey" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-800 section-title">Our Project Journey</h3>
+                <p class="mt-4 text-slate-600 max-w-2xl mx-auto">This interactive timeline showcases the key phases of our development process. Click on each milestone to understand the steps we took, from initial data collection to final testing and evaluation.</p>
+            </div>
+            <div class="relative">
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-300 -translate-y-1/2"></div>
+                <div class="grid md:grid-cols-4 gap-8">
+                    <div id="milestone-1" class="milestone relative bg-white p-4 rounded-lg border-2 border-transparent text-center">
+                        <div class="hidden md:block absolute -top-2 left-1/2 w-4 h-4 bg-slate-300 rounded-full -translate-x-1/2"></div>
+                        <h5 class="font-bold text-emerald-700">Phase 1</h5>
+                        <p class="text-sm text-slate-600">Dataset & Training</p>
+                    </div>
+                    <div id="milestone-2" class="milestone relative bg-white p-4 rounded-lg border-2 border-transparent text-center">
+                        <div class="hidden md:block absolute -top-2 left-1/2 w-4 h-4 bg-slate-300 rounded-full -translate-x-1/2"></div>
+                        <h5 class="font-bold text-emerald-700">Phase 2</h5>
+                        <p class="text-sm text-slate-600">Optimization</p>
+                    </div>
+                    <div id="milestone-3" class="milestone relative bg-white p-4 rounded-lg border-2 border-transparent text-center">
+                        <div class="hidden md:block absolute -top-2 left-1/2 w-4 h-4 bg-slate-300 rounded-full -translate-x-1/2"></div>
+                        <h5 class="font-bold text-emerald-700">Phase 3</h5>
+                        <p class="text-sm text-slate-600">App Development</p>
+                    </div>
+                    <div id="milestone-4" class="milestone relative bg-white p-4 rounded-lg border-2 border-transparent text-center">
+                        <div class="hidden md:block absolute -top-2 left-1/2 w-4 h-4 bg-slate-300 rounded-full -translate-x-1/2"></div>
+                        <h5 class="font-bold text-emerald-700">Phase 4</h5>
+                        <p class="text-sm text-slate-600">Testing & Evaluation</p>
+                    </div>
+                </div>
+            </div>
+            <div id="milestone-details" class="bg-white mt-8 p-6 rounded-lg shadow-md min-h-[100px] flex items-center justify-center">
+                <p class="text-slate-500">Click a milestone to see details.</p>
+            </div>
+        </section>
+
+        <section id="next-steps" class="text-center scroll-mt-20">
+            <h3 class="text-3xl font-bold text-slate-800 section-title">Future Vision & Next Steps</h3>
+            <p class="mt-4 text-slate-600 max-w-2xl mx-auto mb-8">This project lays a strong foundation. Here, we outline potential improvements and future directions that could enhance the app's capabilities and broaden its impact on dermatology and public health.</p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h5 class="font-semibold text-emerald-600 mb-2">Larger Dataset</h5>
+                    <p class="text-sm text-slate-600">Improve robustness and accuracy by training on more diverse data.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h5 class="font-semibold text-emerald-600 mb-2">Real-time Video</h5>
+                    <p class="text-sm text-slate-600">Integrate video scanning for continuous analysis and ease of use.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h5 class="font-semibold text-emerald-600 mb-2">Cloud Integration</h5>
+                    <p class="text-sm text-slate-600">Enable remote dermatologist consultations and secure data backup.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h5 class="font-semibold text-emerald-600 mb-2">Multi-Disease</h5>
+                    <p class="text-sm text-slate-600">Expand the model to detect a wider range of hair and skin conditions.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 mt-16">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <h4 class="text-xl font-semibold mb-2">Project Conclusion</h4>
+            <p class="max-w-3xl mx-auto mb-6 text-slate-400">This project successfully developed a proof-of-concept for an AI-powered mobile app for hair and scalp disease detection. By combining accurate detection, severity scoring, and crucial explainability, the app offers a powerful new tool with the potential to aid early diagnosis, reduce the burden on healthcare systems, and improve public health outcomes.</p>
+            <p class="font-medium">Presented by: [Your Names] | [Your University Name]</p>
+            <div class="flex justify-center space-x-4 mt-4 text-sm">
+                <a href="mailto:[Your Email]" class="hover:text-emerald-400">Email</a>
+                <span>&bull;</span>
+                <a href="[Your LinkedIn Profile]" target="_blank" class="hover:text-emerald-400">LinkedIn</a>
+                <span>&bull;</span>
+                <a href="[Project GitHub Link]" target="_blank" class="hover:text-emerald-400">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const accuracyCtx = document.getElementById('accuracyChart').getContext('2d');
+            new Chart(accuracyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Accurate', 'Inaccurate'],
+                    datasets: [{
+                        label: 'Model Accuracy',
+                        data: [92, 8],
+                        backgroundColor: [
+                            '#10b981', // emerald-500
+                            '#fca5a5'  // red-300
+                        ],
+                        borderColor: [
+                            '#ffffff',
+                            '#ffffff'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const workflowSteps = {
+                'step-1': '<strong>1. Image Input:</strong> The user captures or uploads a scalp image directly through the mobile app. High-quality input is encouraged for best results.',
+                'step-2': '<strong>2. Segmentation (U-Net):</strong> The image is processed by a U-Net model to precisely isolate the scalp area, effectively removing hair and background noise to focus the analysis.',
+                'step-3': '<strong>3. Classification & Scoring (MobileNet):</strong> The segmented image is fed into our lightweight MobileNet model. It performs the dual task of identifying the disease and quantifying its severity.',
+                'step-4': '<strong>4. Explainability (Grad-CAM):</strong> A Grad-CAM heatmap is generated, visually highlighting the specific regions of the image that most influenced the model\'s decision, ensuring transparency.',
+                'step-5': '<strong>5. Mobile Integration:</strong> The entire pipeline, fully optimized with TF-Lite, is packaged into a single, efficient Android application for seamless on-device inference.'
+            };
+            const workflowDetails = document.getElementById('workflow-details');
+            document.querySelectorAll('.step-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    workflowDetails.innerHTML = workflowSteps[card.id];
+                });
+            });
+
+            const milestoneDetailsContent = {
+                'milestone-1': '<strong>Phase 1: Dataset & Training:</strong> This initial phase involved collecting and annotating a diverse dataset of scalp images. We then performed the initial training of our core models, U-Net for segmentation and MobileNet for classification.',
+                'milestone-2': '<strong>Phase 2: Optimization:</strong> We focused on making the models efficient for mobile use. This included converting them to the TF-Lite format and successfully integrating the Grad-CAM module for explainability.',
+                'milestone-3': '<strong>Phase 3: Mobile App Development:</strong> This phase covered the creation of the Android application, from designing the front-end UI/UX to implementing the back-end logic that integrates and runs the AI models.',
+                'milestone-4': '<strong>Phase 4: Testing & Evaluation:</strong> The final phase involved rigorous testing. We measured key performance metrics like accuracy and latency, and gathered crucial user feedback to identify and resolve bugs.'
+            };
+            const milestoneDetails = document.getElementById('milestone-details');
+            const milestones = document.querySelectorAll('.milestone');
+            milestones.forEach(milestone => {
+                milestone.addEventListener('click', () => {
+                    milestones.forEach(m => m.classList.remove('active'));
+                    milestone.classList.add('active');
+                    milestoneDetails.innerHTML = milestoneDetailsContent[milestone.id];
+                });
+            });
+            
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', function() {
+                if (this.value) {
+                    window.location.hash = this.value;
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
